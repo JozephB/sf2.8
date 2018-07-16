@@ -1,0 +1,111 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+    <div class="_error">
+
+    </div>
+
+    {{ form_start(form, {'attr': {'id': 'signupform'}}) }}
+
+    {{ form_errors(form) }}
+
+        <ul class="form-style-1">
+            <li>
+                {# Génération du label. #}
+                {{ form_label(form.first_name, 'Full Name') }}
+
+                {# Génération de l'input. #}
+                {{ form_widget(form.first_name, {'attr': {'class': 'field-divided','placeholder': 'First'}}) }}
+
+                {# Génération de l'input. #}
+                {{ form_widget(form.last_name, {'attr': {'class': 'field-divided','placeholder': 'Last'}}) }}
+
+            </li>
+            <li>
+                {# Génération du label. #}
+                {{ form_label(form.email, 'Email') }}
+                {# Génération de l'input. #}
+                {{ form_widget(form.email, {'attr': {'class': 'field-long','placeholder': 'Email'}}) }}
+            </li>
+            <li>
+                {# Génération du label. #}
+                {{ form_label(form.subject, 'Subject') }}
+                {# Génération du select. #}
+                {{ form_widget(form.subject, {'attr': {'class': 'field-select'}}) }}
+            </li>
+            <li>
+                {# Génération du label. #}
+                {{ form_label(form.message, 'Your Message') }}
+                {# Génération du textarea. #}
+                {{ form_widget(form.message, {'attr': {'class': 'field-long field-textarea'}}) }}
+
+            </li>
+            <li>
+                {# Génération du select. #}
+                {{ form_widget(form.save) }}
+            </li>
+        </ul>
+    {{ form_end(form) }}
+
+    {% include 'Default/data.html.twig' %}
+
+    {% block javascripts %}
+        <script type="text/javascript">
+            $( document ).ready(function() {
+                $.fn.dataTable.ext.errMode = 'none';
+
+                $("#signupform").off().submit(function(e) {
+                        var ulErr = $("._error > ul ");
+                        var ul    =  $('<ul/>');
+                    $.ajax({
+                        type: "POST",
+                        url : "{{ path('homepage') }}",
+                        dataType:"json",
+                        data: $("#signupform").serialize(),
+
+                        beforeSend: function() {
+                            if(ulErr.length > 0)
+                                ulErr.remove();
+                        },
+                        success: function(data)
+                        {
+                            console.log(data)
+                           /* var data = [
+                                [ "Tiger Nixon", "System Architect", "Edinburgh", "5421" ],
+                                [ "Garrett Winters", "Accountant", "Tokyo", "8422"],
+                                [ "Ashton Cox", "Junior Technical Author", "San Francisco", "1562"],
+                            ];*/
+
+                            $('#contact').DataTable({
+                                data: data,
+                            });
+
+                            $('#signupform').hide();
+                            $('#contact').show();
+
+                        },
+                        error: function (data) {
+
+                            data = $.parseJSON(data.responseText)[0].data;
+
+                            $.each(data, function (index, value) {
+                                ul.append($('<li/>').addClass('_error').text(data[index]));
+                            });
+                            $("._error").append(ul);
+                        },
+                    });
+
+                    e.preventDefault();
+                });
+            });
+
+        </script>
+
+    {% endblock %}
+
+
+{% endblock %}
+
+
+
